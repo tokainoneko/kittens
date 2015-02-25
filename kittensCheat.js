@@ -79,13 +79,15 @@ dojo.declare("com.nuclearunicorn.game.ui.GeneralToolsButton", com.nuclearunicorn
 });
 
 dojo.declare("com.nuclearunicorn.game.ui.tab.Tools", com.nuclearunicorn.game.ui.tab, {
-
-    generalPanel: null,
-
     render: function(container) {
-        this.generalPanel = com.nuclearunicorn.game.ui.Panel("General");
-        var content = this.generalPanel.render(container);
+        var generalPanel = com.nuclearunicorn.game.ui.Panel("General");
+        var content = generalPanel.render(container);
 
+        this.renderGeneral(container);
+        this.renderCraft(container);
+    },
+
+    renderGeneral: function(container) {
         for (var i = 0; i < this.game.cheats.options.length; i++) {
             var option = this.game.cheats.options[i];
             var button = new com.nuclearunicorn.game.ui.GeneralToolsButton({
@@ -95,6 +97,22 @@ dojo.declare("com.nuclearunicorn.game.ui.tab.Tools", com.nuclearunicorn.game.ui.
                 handler: option.handler,
             }, this.game);
             button.render(content);
+        }
+    },
+
+    renderCraft: function(container) {
+        var craftPanel = com.nuclearunicorn.game.ui.Panel("Auto Crafting")
+        var content = craftPanel.render(container);
+
+        var crafts = this.game.workshop.crafts;
+        for (var i = 0; i < crafts.length; i++) {
+            var craft = crafts[i];
+            var button = new com.nuclearunicorn.game.ui.ButtonModern({
+                name: craft.name,
+            }, this.game);
+            button.render(content);
+
+            button.setEnabled(craft.unlocked);
         }
     },
 });
