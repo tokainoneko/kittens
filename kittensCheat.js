@@ -1,5 +1,6 @@
 ﻿dojo.declare("classes.managers.Tools", null, {
     game: null,
+	crafts: null,
 
     options: [
         {
@@ -31,6 +32,8 @@
                 if (!self.enabled) {
                     return;
                 }
+				
+				game.cheets.crafts.update();
             },
         }, {
             name: "autoTrade",
@@ -55,6 +58,7 @@
 
     constractor: function(game) {
         this.game = game;
+		this.crafts = new com.nuclearunicorn.game.Tools.AutoCrafting(this.game);
     },
 
     getOption: function(name) {
@@ -80,6 +84,10 @@ dojo.declare("com.nuclearunicorn.game.Tools.AutoCrafting", null, {
 	constractor: function(game) {
 		this.game = game;
 		this.crafts = [];
+	},
+	
+	addCraft: function(craft) {
+		this.crafts.push(craft);
 	},
 	
 	update: function() {
