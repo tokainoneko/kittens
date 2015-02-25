@@ -1,5 +1,5 @@
 ﻿dojo.declare("classes.managers.Tools", null, {
-    gmae: null,
+    game: null,
 
     options: [
         {
@@ -12,8 +12,17 @@
             action: function(game, self) {
             },
         }, {
+            name: "autoManagement",
+            title: "Auto Management",
+            description: "",
+            enabled: false,
+            handler: function(button) {
+            },
+            action: function(game, self) {
+            },
+        }, {
             name: "autoCraft",
-            title: "AutoCraft",
+            title: "Auto Craft",
             description: "",
             enabled: false,
             handler: function(button) {
@@ -23,11 +32,29 @@
                     return;
                 }
             },
+        }, {
+            name: "autoTrade",
+            title: "Auto Trade",
+            description: "",
+            enabled: false,
+            handler: function(button) {
+            },
+            action: function(game, self) {
+            },
+        }, {
+            name: "autoSun",
+            title: "Auto Sun",
+            description: "",
+            enabled: false,
+            handler: function(button) {
+            },
+            action: function(game, self) {
+            },
         },
     ],
 
     constractor: function(game) {
-        this.gmae = game;
+        this.game = game;
     },
 
     getOption: function(name) {
@@ -41,7 +68,7 @@
 
     update: function() {
         for (var i = 0; i < this.options.length; i++) {
-            this.options[i].action(this.gmae, this.options[i]);
+            this.options[i].action(this.game, this.options[i]);
         }
     },
 });
@@ -78,42 +105,86 @@ dojo.declare("com.nuclearunicorn.game.ui.GeneralToolsButton", com.nuclearunicorn
     },
 });
 
+dojo.declare("com.nuclearunicorn.game.ui.AutoCraftButton", com.nuclearunicorn.game.ui.ButtonModern, {
+    auto: false,
+
+    onClick: function() {
+        this.animate();
+        this.handler(this);
+    },
+
+    afterRender: function() {
+        this.inherited(arguments);
+
+        this.toggle = this.addLink(this.auto ? "off" : "on",
+            function() {
+                this.auto = !this.auto;
+            }, true
+        );
+    },
+
+    update: function() {
+        this.inherited(arguments);
+
+        if (this.toggle) {
+            this.toggle.link.innerHTML = this.auto ? "off" : "on";
+        }
+    },
+});
+
 dojo.declare("com.nuclearunicorn.game.ui.tab.Tools", com.nuclearunicorn.game.ui.tab, {
+    generalPanel: null,
+    craftPanel: null,
+
     render: function(container) {
-        var generalPanel = com.nuclearunicorn.game.ui.Panel("General");
-        var content = generalPanel.render(container);
+        this.buttons = [];
 
         this.renderGeneral(container);
         this.renderCraft(container);
     },
 
     renderGeneral: function(container) {
-        for (var i = 0; i < this.game.cheats.options.length; i++) {
-            var option = this.game.cheats.options[i];
+        this.generalPanel = com.nuclearunicorn.game.ui.Panel("General");
+        var content = this.generalPanel.render(container);
+
+        var self = this;
+        dojo.forEach(this.game.cheats.options, function(option) {
             var button = new com.nuclearunicorn.game.ui.GeneralToolsButton({
                 id: option.name,
                 name: option.title,
                 description: option.description,
                 handler: option.handler,
-            }, this.game);
+            }, self.game);
             button.render(content);
-        }
+            self.generalPanel.addChild(button);
+        });
     },
 
     renderCraft: function(container) {
-        var craftPanel = com.nuclearunicorn.game.ui.Panel("Auto Crafting")
-        var content = craftPanel.render(container);
+        this.craftPanel = com.nuclearunicorn.game.ui.Panel("Auto Crafting")
+        var content = this.craftPanel.render(container);
 
-        var crafts = this.game.workshop.crafts;
-        for (var i = 0; i < crafts.length; i++) {
-            var craft = crafts[i];
-            var button = new com.nuclearunicorn.game.ui.ButtonModern({
-                name: craft.name,
-            }, this.game);
+        var self = this;
+        dojo.forEach(this.game.workshop.crafts, function(craft) {
+            var button = new com.nuclearunicorn.game.ui.AutoCraftButton({
+                id: craft.name,
+                name: craft.title,
+                description: craft.description,
+                prices: craft.prices,
+                handler: dojo.partial(function(craft, btn) {
+                    btn.game.workshop.craft(craft.name, 1);
+                }, craft)
+            }, self.game);
             button.render(content);
+            self.craftPanel.addChild(button);
+        });
+    },
 
-            button.setEnabled(craft.unlocked);
-        }
+    update: function() {
+        this.inherited(arguments);
+
+        this.generalPanel.update();
+        this.craftPanel.update();
     },
 });
 
