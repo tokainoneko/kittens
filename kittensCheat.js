@@ -68,12 +68,21 @@
             this.crafts.addCraft({
                 name: craft.name,
                 enabled: false,
-                action: function(game, self) {
+                action: dojo.hitch(craft, function(game, self) {
                     if (!self.enabled) {
                         return;
                     }
-                    game.workshop.craft(self.name, 1);
-                },
+
+                    var minAmt = Number.MAX_VALUE;
+                    for (var i = 0; i < this.prices.length; i++) {
+                        var totalRes = game.resPool.get(this.prices[i].name).value;
+                        var allAmt = Math.floor(totalRes / this.prices[i].val * 0.75);
+                        if (allAmt < minAmt) {
+                            minAmt = allAmt;
+                        }
+                    }
+                    game.workshop.craft(self.name, minAmt);
+                }),
             });
         }, this);
     },
