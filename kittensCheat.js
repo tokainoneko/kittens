@@ -32,8 +32,8 @@
                 if (!self.enabled) {
                     return;
                 }
-				
-                game.cheets.crafts.update();
+
+                game.cheats.crafts.update();
             },
         }, {
             name: "autoTrade",
@@ -56,9 +56,26 @@
         },
     ],
 
-    constractor: function(game) {
+    constructor: function(game) {
         this.game = game;
         this.crafts = new com.nuclearunicorn.game.Tools.AutoCrafting(this.game);
+
+        this.init()
+    },
+
+    init: function() {
+        dojo.forEach(this.game.workshop.crafts, function(craft) {
+            this.crafts.addCraft({
+                name: craft.name,
+                enabled: false,
+                action: function(game, self) {
+                    if (!self.enabled) {
+                        return;
+                    }
+                    game.workshop.craft(self.name, 1);
+                },
+            });
+        }, this);
     },
 
     getOption: function(name) {
@@ -71,32 +88,41 @@
     },
 
     update: function() {
-        for (var i = 0; i < this.options.length; i++) {
-            this.options[i].action(this.game, this.options[i]);
-        }
+        dojo.forEach(this.options, function(option) {
+            option.action(this.game, option);
+        }, this);
     },
 });
 
 dojo.declare("com.nuclearunicorn.game.Tools.AutoCrafting", null, {
     game: null,
     crafts: null,
-	
-    constractor: function(game) {
+
+    constructor: function(game) {
         this.game = game;
         this.crafts = [];
     },
-	
+
     addCraft: function(craft) {
         this.crafts.push(craft);
     },
-	
+
+    get: function(name) {
+        for (var i = 0; i < this.crafts.length; i++) {
+            var craft = this.crafts[i];
+            if (craft.name == name) {
+                return craft;
+            }
+        }
+    },
+
     update: function() {
         dojo.forEach(this.crafts, dojo.hitch(this, function(craft) {
             if (!craft.enabled) {
                 return;
             }
-			
-            craft.action(this.game);
+
+            craft.action(this.game, craft);
         }));
     },
 });
@@ -115,7 +141,7 @@ dojo.declare("com.nuclearunicorn.game.ui.GeneralToolsButton", com.nuclearunicorn
         this.inherited(arguments);
 
         var option = this.getTool();
-        this.toggle = this.addLink(option.enabled ? "off" : "on",function() {
+        this.toggle = this.addLink(option.enabled ? "off" : "on", function() {
             var option = this.getTool();
             option.enabled = !option.enabled;
         }, true);
@@ -132,7 +158,9 @@ dojo.declare("com.nuclearunicorn.game.ui.GeneralToolsButton", com.nuclearunicorn
 });
 
 dojo.declare("com.nuclearunicorn.game.ui.AutoCraftButton", com.nuclearunicorn.game.ui.ButtonModern, {
-    auto: false,
+    getCraft: function() {
+        return this.game.cheats.crafts.get(this.id);
+    },
 
     onClick: function() {
         this.animate();
@@ -142,16 +170,18 @@ dojo.declare("com.nuclearunicorn.game.ui.AutoCraftButton", com.nuclearunicorn.ga
     afterRender: function() {
         this.inherited(arguments);
 
-        this.toggle = this.addLink(this.auto ? "off" : "on", function() {
-            this.auto = !this.auto;
+        var craft = this.getCraft();
+        this.toggle = this.addLink(craft.enabled ? "off" : "on", function() {
+            craft.enabled = !craft.enabled;
         }, true);
     },
 
     update: function() {
         this.inherited(arguments);
 
+        var craft = this.getCraft();
         if (this.toggle) {
-            this.toggle.link.innerHTML = this.auto ? "off" : "on";
+            this.toggle.link.innerHTML = craft.enabled ? "off" : "on";
         }
     },
 });
