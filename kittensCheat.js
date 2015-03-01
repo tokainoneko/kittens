@@ -52,6 +52,10 @@
             handler: function(button) {
             },
             action: function(game, self) {
+                var res = game.resPool.get("faith");
+                if (0.95 < res.value / res.maxValue) {
+                    game.religion.praise();
+                }
             },
         },
     ],
@@ -75,10 +79,12 @@
 
                     var minAmt = Number.MAX_VALUE;
                     for (var i = 0; i < this.prices.length; i++) {
-                        var totalRes = game.resPool.get(this.prices[i].name).value;
-                        var allAmt = Math.floor(totalRes / this.prices[i].val * 0.75);
-                        if (allAmt < minAmt) {
-                            minAmt = allAmt;
+                        var res = game.resPool.get(this.prices[i].name);
+                        if (0.95 < res.value / res.maxValue) {
+                            var allAmt = Math.floor(res.value / this.prices[i].val * 0.75);
+                            if (allAmt < minAmt) {
+                                minAmt = allAmt;
+                            }
                         }
                     }
                     game.workshop.craft(self.name, minAmt);
