@@ -52,6 +52,10 @@
             handler: function(button) {
             },
             action: function(game, self) {
+                if (!self.enabled) {
+                    return;
+                }
+
                 var res = game.resPool.get("faith");
                 if (0.95 < res.value / res.maxValue) {
                     game.religion.praise();
