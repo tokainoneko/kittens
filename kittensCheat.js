@@ -45,6 +45,23 @@
             action: function(game, self) {
             },
         }, {
+            name: "autoHunt",
+            title: "Auto Hunt",
+            description: "",
+            enabled: false,
+            handler: function(button) {
+            },
+            action: function(game, self) {
+                if (!self.enabled) {
+                    return;
+                }
+
+                var res = game.resPool.get("manpower");
+                if (0.95 < res.value / res.maxValue) {
+                    game.village.huntAll();
+                }
+            },
+        }, {
             name: "autoSun",
             title: "Auto Sun",
             description: "",
