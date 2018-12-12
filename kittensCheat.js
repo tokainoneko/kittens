@@ -1,4 +1,4 @@
-﻿dojo.declare("classes.managers.Tools", null, {
+﻿dojo.declare("classes.managers.Tools", com.nuclearunicorn.core.TabManager, {
     game: null,
     crafts: null,
 
@@ -152,15 +152,20 @@ dojo.declare("com.nuclearunicorn.game.ui.GeneralToolsButton", com.nuclearunicorn
     },
 
     onClick: function() {
+        var self = this;
         this.animate();
-        this.handler(this);
+        this.controller.buyItem(this.model, event, function (result) {
+            if (result) {
+                self.update();
+            }
+        });
     },
 
     afterRender: function() {
         this.inherited(arguments);
 
         var option = this.getTool();
-        this.toggle = this.addLink(option.enabled ? "off" : "on", function() {
+        this.toggle = this.addLink(option.enabled ? "on" : "off", function () {
             var option = this.getTool();
             option.enabled = !option.enabled;
         }, true);
@@ -171,7 +176,7 @@ dojo.declare("com.nuclearunicorn.game.ui.GeneralToolsButton", com.nuclearunicorn
 
         var option = this.getTool();
         if (this.toggle) {
-            this.toggle.link.innerHTML = option.enabled ? "off" : "on";
+            this.toggle.link.innerHTML = option.enabled ? "on" : "off";
         }
     },
 });
@@ -182,15 +187,20 @@ dojo.declare("com.nuclearunicorn.game.ui.AutoCraftButton", com.nuclearunicorn.ga
     },
 
     onClick: function() {
+        var self = this;
         this.animate();
-        this.handler(this);
+        this.controller.buyItem(this.model, event, function (result) {
+            if (result) {
+                self.update();
+            }
+        });
     },
 
     afterRender: function() {
         this.inherited(arguments);
 
         var craft = this.getCraft();
-        this.toggle = this.addLink(craft.enabled ? "off" : "on", function() {
+        this.toggle = this.addLink(craft.enabled ? "on" : "off", function () {
             craft.enabled = !craft.enabled;
         }, true);
     },
@@ -200,7 +210,7 @@ dojo.declare("com.nuclearunicorn.game.ui.AutoCraftButton", com.nuclearunicorn.ga
 
         var craft = this.getCraft();
         if (this.toggle) {
-            this.toggle.link.innerHTML = craft.enabled ? "off" : "on";
+            this.toggle.link.innerHTML = craft.enabled ? "on" : "off";
         }
     },
 });
@@ -225,6 +235,7 @@ dojo.declare("com.nuclearunicorn.game.ui.tab.Tools", com.nuclearunicorn.game.ui.
                 name: option.title,
                 description: option.description,
                 handler: option.handler,
+                controller: new com.nuclearunicorn.game.ui.ButtonModernController(this.game),
             }, this.game);
             button.render(content);
             this.generalPanel.addChild(button);
@@ -239,12 +250,13 @@ dojo.declare("com.nuclearunicorn.game.ui.tab.Tools", com.nuclearunicorn.game.ui.
         dojo.forEach(this.game.workshop.crafts, dojo.hitch(this, function(craft) {
             var button = new com.nuclearunicorn.game.ui.AutoCraftButton({
                 id: craft.name,
-                name: craft.title,
+                name: craft.label,
                 description: craft.description,
                 prices: craft.prices,
                 handler: dojo.partial(function(craft, btn) {
-                    btn.game.workshop.craft(craft.name, 1);
-                }, craft)
+                    this.game.workshop.craft(craft.name, 1);
+                }, craft),
+                controller: new com.nuclearunicorn.game.ui.ButtonModernController(this.game),
             }, this.game);
             button.render(content);
             this.craftPanel.addChild(button);
@@ -267,7 +279,7 @@ dojo.hitch(gamePage, function() {
     this.cheats = new classes.managers.Tools(this);
     this.timer.addEvent(dojo.hitch(this, function() { this.cheats.update(); }), 1);
 
-    this.toolsTab = new com.nuclearunicorn.game.ui.tab.Tools("Cheat", this);
+    this.toolsTab = new com.nuclearunicorn.game.ui.tab.Tools({ name: "Cheat", id: "Cheat" }, this);
     this.toolsTab.visible = true;
     this.addTab(this.toolsTab);
 
