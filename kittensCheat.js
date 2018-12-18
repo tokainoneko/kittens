@@ -43,6 +43,18 @@
             handler: function(button) {
             },
             action: function(game, self) {
+                if (!self.enabled) {
+                    return;
+                }
+
+                var res = game.resPool.get("gold");
+                var man = game.resPool.get("manpower");
+                if (0.95 < res.value / res.maxValue && 0.9 < man.value / man.maxValue) {
+                    var race = game.diplomacy.get("nagas");
+                    if (0.9 <= race.sells[0].seasons[game.calendar.getCurSeason().name]) {
+                        game.diplomacy.tradeAll(race);
+                    }
+                }
             },
         }, {
             name: "autoHunt",
